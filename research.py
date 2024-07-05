@@ -374,7 +374,6 @@ def analyze_health_data(df: pl.DataFrame):
     fig.update_layout(height=800, width=1200, title_text="Daily Trends")
 
     # Highlight insights
-    st.subheader('Key Insights')
     st.markdown("""
     ### Key Insights
 
