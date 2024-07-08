@@ -191,6 +191,7 @@ def perform_t_tests(df: pl.DataFrame, value_x: str, value_y: str):
     st.write("### Box Plot of " + value_y + " by " + value_x)
     st.plotly_chart(fig)
     
+    
     return result
     
 
