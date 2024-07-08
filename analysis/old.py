@@ -1,3 +1,4 @@
+import numpy as np
 import streamlit as st
 import polars as pl
 import plotly.express as px
@@ -159,7 +160,7 @@ Procedure for Each Example:
              
 """)
 
-def perform_t_tests(df: pl.DataFrame, value_x, value_y):
+def perform_t_tests(df: pl.DataFrame, value_x: str, value_y: str):
     if value_x not in df.columns or value_y not in df.columns:
         return "Invalid columns for t-test."
 
@@ -173,11 +174,18 @@ def perform_t_tests(df: pl.DataFrame, value_x, value_y):
     if len(group_1) < 2 or len(group_2) < 2:
         return "Not enough data for t-test."
 
-    t_stat, p_value = ttest_ind(group_1.select(value_y).to_numpy(), group_2.select(value_y).to_numpy())
-    
+    # Drop NaN values
+    group_1 = group_1.drop_nulls(value_y)
+    group_2 = group_2.drop_nulls(value_y)
+
+    # Ensure there is variance in both groups
+    if np.var(group_1.select(value_y).to_numpy()) == 0 or np.var(group_2.select(value_y).to_numpy()) == 0:
+        return "One of the groups has no variance."
+
+    t_stat, p_value = ttest_ind(group_1.select(value_y).to_numpy(), group_2.select(value_y).to_numpy(), equal_var=False)
+
     result = f"T-test results: t-statistic = {t_stat}, p-value = {p_value}"
     
-    # Visualize the results with a box plot
     # Visualize the results with a box plot
     fig = px.box(df.to_pandas(), x=value_x, y=value_y, title='Box Plot of ' + value_y + ' by ' + value_x)
     st.write("### Box Plot of " + value_y + " by " + value_x)
@@ -185,7 +193,6 @@ def perform_t_tests(df: pl.DataFrame, value_x, value_y):
     
     return result
     
-    return result
 
 def perform_graph_analysis(
         df: pl.DataFrame, 
