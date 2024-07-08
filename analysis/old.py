@@ -290,27 +290,4 @@ def analyze_health_data(df: pl.DataFrame):
 
     fig.update_layout(height=800, width=1200, title_text="Daily Trends")
 
-    # Highlight insights
-    st.markdown("""
-    ### Key Insights
-
-    1. **Lagged Steps and Stress Levels**: 
-    - The correlation is strongly negative (-0.999), suggesting that an increase in steps from the previous week is associated with a decrease in stress levels in the following week.
-
-    2. **Lagged Steps and Sleep Duration**: 
-    - The correlation is slightly positive (0.070), indicating a weak relationship where an increase in steps from the previous week might be associated with a slight increase in sleep duration in the following week.
-
-    3. **Lagged Steps and Daily Score**: 
-    - The correlation is strongly positive (0.934), suggesting that an increase in steps from the previous week is associated with an increase in the daily score in the following week.
-
-    4. **Stress Levels and Sleep Duration**: 
-    - The correlation is strongly negative (-0.716), indicating that higher stress levels are associated with shorter sleep duration within the same week.
-
-    5. **Stress Levels and Daily Score**: 
-    - The correlation is moderately positive (0.816), suggesting that higher stress levels within the same week are associated with higher daily scores, which might indicate a possible misunderstanding or misinterpretation of how stress levels contribute to the daily score positively in this context.
-
-    6. **Sleep Duration and Daily Score**: 
-    - The correlation is moderately negative (-0.736), indicating that longer sleep duration within the same week is associated with lower daily scores.
-    """)
-
     return correlation_matrix, fig

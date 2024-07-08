@@ -105,10 +105,10 @@ def main():
         st.write("## Perform t-tests")
         if value_x and value_y:
             t_test_result = perform_t_tests(df, value_x, value_y)
-            text_analysis_T_test_example()
 
             st.write("### t-test Result")
             st.write(t_test_result)
+            text_analysis_T_test_example()
 
         
         correlation_matrix, fig = analyze_health_data(df)
