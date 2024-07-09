@@ -1,10 +1,8 @@
 import streamlit as st
 import polars as pl
 from urllib.error import URLError
-import plotly.express as px
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
-
+from analysis.correlation_metrices import plot_cohort_correlation_matrix
+from analysis.match_graph_type_comparison import match_graph_type_comparison
 from analysis.old import analyze_health_data, perform_graph_analysis, perform_t_tests, text_analysis_T_test_example, use_parquet_file_by_upload
 from analysis.over_time_analysis_comparssion import figure_line_grouped, filter_and_group_by
 
@@ -14,16 +12,20 @@ from analysis.over_time_analysis_comparssion import figure_line_grouped, filter_
 # TODO: Add t-test
 # TODO: Deploy to streamlit share
 # TODO: Buy a streamlit share subscription
-
-def match_graph_type_comparison(df: pl.DataFrame, value_x: str, value_y: str, value_color: str, graph_type: str):
-    match graph_type:
-        case "Histogram":
-            fig = px.histogram(df.to_pandas(), color=value_x, x=value_y, marginal="box", barmode="overlay", nbins=20, histnorm="percent")
-        case _:
-            fig = px.box(df.to_pandas(), x=value_x, y=value_y, color=value_color)
-    return fig
-
-
+blue_to_green = [
+    '#3C9BED', 
+    '#349AC7',
+    '#2D9BA1',
+    '#26A37B', 
+    '#1FAB55',
+]
+orange_to_green = [
+    '#FF9933', 
+    '#E6A233', 
+    '#CCAB34',
+    '#B2B434',
+    '#99BD35',
+]
 def main():
     try:
 
@@ -64,6 +66,9 @@ def main():
         )
 
         st.plotly_chart(fig) 
+
+        plot_cohort_correlation_matrix(df.filter(pl.col("Cohort") == "ISR"), "ISR", blue_to_green)
+        plot_cohort_correlation_matrix(df.filter(pl.col("Cohort") == "IND"), "IND", orange_to_green)
 
         col1, col2, col3, col4 = st.columns(4)
         with col1: 

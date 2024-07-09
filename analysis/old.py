@@ -8,9 +8,6 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import glob
 
-
-
-
 def use_parquet_file_by_upload():
     uploaded_file = st.file_uploader("Choose a file")
     if uploaded_file is not None:
@@ -190,7 +187,6 @@ def perform_t_tests(df: pl.DataFrame, value_x: str, value_y: str):
     fig = px.box(df.to_pandas(), x=value_x, y=value_y, title='Box Plot of ' + value_y + ' by ' + value_x)
     st.write("### Box Plot of " + value_y + " by " + value_x)
     st.plotly_chart(fig)
-    
     
     return result
     
