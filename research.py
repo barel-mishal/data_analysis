@@ -26,6 +26,8 @@ orange_to_green = [
     '#B2B434',
     '#99BD35',
 ]
+
+col_all_cohorts = "All_Cohorts"
 def main():
     try:
 
@@ -36,6 +38,17 @@ def main():
         df = df.with_columns([pl.col("Date").cast(pl.Datetime)])
         df = df.sort("Date")
         columns = ["Cohort", *filter(lambda x: x != "Cohort", df.columns)]
+        cohorts = sorted(df.select(col_all_cohorts).unique().to_pandas().values.flatten())
+
+        st.write("## Schema")
+        st.write(df.schema)
+        st.write("## Data")
+        cols = st.multiselect("Filter Cohorts", cohorts)
+
+        df = df.filter(pl.col(col_all_cohorts).is_in(cols))
+        st.write(df.to_pandas())
+
+        value_columns = [x for x in columns if x not in ["Patient_nmb", "Date", "Record_count", "Cohort"]]
 
         col1, col2 = st.columns([2, 1])
         with col1:
@@ -43,85 +56,105 @@ def main():
             st.write("## Cohort Analysis")
         with col2:
             value_columns = [x for x in columns if x not in ["Patient_nmb", "Date", "Record_count", "Cohort"]]
-
             value_y = st.selectbox("Y Axis", value_columns, index=4)
+
         graph_type = st.selectbox("Graph Type", ["Histogram", "Box"])
-        fig = match_graph_type_comparison(df, value_x, value_y, value_x, graph_type)
-        st.plotly_chart(fig)
 
-        st.write("## Line Graph")
+        rander_line_graph(df, value_y)
 
-        proccess = filter_and_group_by(df, ["Record_count", "Cohort"], value_y)
+        rander_histogram(df, value_x, value_y, value_x)
 
-        fig = figure_line_grouped(
-            proccess, 
-            "Record_count", 
-            value_y,
-            f"{value_y} Over Time", 
-            "Days Since Start", 
-            "Mean Daily Score", 
-            ['#FF9933','#3C9BED'], 
-            "Cohort",
-            True
-        )
 
-        st.plotly_chart(fig) 
 
-        plot_cohort_correlation_matrix(df.filter(pl.col("Cohort") == "ISR"), "ISR", blue_to_green)
-        plot_cohort_correlation_matrix(df.filter(pl.col("Cohort") == "IND"), "IND", orange_to_green)
 
-        col1, col2, col3, col4 = st.columns(4)
-        with col1: 
-            value_x = st.selectbox(
-                "Value Of X", columns
+
+
+        if False:
+            col1, col2 = st.columns([2, 1])
+            with col1:
+                value_x = "Cohort"
+                st.write("## Cohort Analysis")
+            with col2:
+                value_columns = [x for x in columns if x not in ["Patient_nmb", "Date", "Record_count", "Cohort"]]
+
+                value_y = st.selectbox("Y Axis", value_columns, index=4)
+            graph_type = st.selectbox("Graph Type", ["Histogram", "Box"])
+            fig = match_graph_type_comparison(df, value_x, value_y, value_x, graph_type)
+            st.plotly_chart(fig)
+
+            st.write("## Line Graph")
+
+            proccess = filter_and_group_by(df, ["Record_count", "Cohort"], value_y)
+
+            fig = figure_line_grouped(
+                proccess, 
+                "Record_count", 
+                value_y,
+                f"{value_y} Over Time", 
+                "Days Since Start", 
+                "Mean Daily Score", 
+                ['#FF9933','#3C9BED'], 
+                "Cohort",
+                True
             )
-        with col2:
-            value_y = st.selectbox(
-                "Value Of Y", columns, index=1
-            )
-        with col3:
-            value_color = st.selectbox(
-                "Value Of Color", set([None, *df.columns]), index=0
-            )
-        with col4:
-            graph_type = st.selectbox(
-                "Graph Type",
-                ["Bar", "Line", "Scatter", "Pie", "Histogram"],
-            )
-        if not value_x:
-            st.error(f"Please select a value for X axis. {df.columns}")
-        elif not value_y:
-            st.error(f"Please select a value for Y axis. {df.columns}")
-        elif value_x == value_y:
-            st.error(f"Please select different values for X and Y axes. {df.columns}")
-        else:
-            perform_graph_analysis(df, value_x, value_y, value_color, graph_type)
-        # Buttons to perform t-tests
 
-        col1, col2 = st.columns(2)
-        with col1: 
-            value_x = st.selectbox(
-                "Independent 1 x", columns
-            )
-        with col2:
-            value_y = st.selectbox(
-                "Independent 2 y", columns, index=3
-            )
-        st.write("## Perform t-tests")
-        if value_x and value_y:
-            t_test_result = perform_t_tests(df, value_x, value_y)
+            st.plotly_chart(fig) 
 
-            st.write("### t-test Result")
-            st.write(t_test_result)
-            text_analysis_T_test_example()
+            plot_cohort_correlation_matrix(df.filter(pl.col("Cohort") == "ISR"), "ISR", blue_to_green)
+            plot_cohort_correlation_matrix(df.filter(pl.col("Cohort") == "IND"), "IND", orange_to_green)
 
-        
-        correlation_matrix, fig = analyze_health_data(df)
-        st.header("Correlation Matrix")
-        st.write(correlation_matrix)
+            col1, col2, col3, col4 = st.columns(4)
+            with col1: 
+                value_x = st.selectbox(
+                    "Value Of X", columns
+                )
+            with col2:
+                value_y = st.selectbox(
+                    "Value Of Y", columns, index=1
+                )
+            with col3:
+                value_color = st.selectbox(
+                    "Value Of Color", set([None, *df.columns]), index=0
+                )
+            with col4:
+                graph_type = st.selectbox(
+                    "Graph Type",
+                    ["Bar", "Line", "Scatter", "Pie", "Histogram"],
+                )
+            if not value_x:
+                st.error(f"Please select a value for X axis. {df.columns}")
+            elif not value_y:
+                st.error(f"Please select a value for Y axis. {df.columns}")
+            elif value_x == value_y:
+                st.error(f"Please select different values for X and Y axes. {df.columns}")
+            else:
+                perform_graph_analysis(df, value_x, value_y, value_color, graph_type)
+            # Buttons to perform t-tests
 
-        st.header("daily Trends")
-        st.plotly_chart(fig)
+            col1, col2 = st.columns(2)
+            with col1: 
+                value_x = st.selectbox(
+                    "Independent 1 x", columns
+                )
+            with col2:
+                value_y = st.selectbox(
+                    "Independent 2 y", columns, index=3
+                )
+            st.write("## Perform t-tests")
+            if value_x and value_y:
+                t_test_result = perform_t_tests(df, value_x, value_y)
+
+                st.write("### t-test Result")
+                st.write(t_test_result)
+                text_analysis_T_test_example()
+
+            
+            correlation_matrix, fig = analyze_health_data(df)
+            st.header("Correlation Matrix")
+            st.write(correlation_matrix)
+
+            st.header("daily Trends")
+            st.plotly_chart(fig)
 
     except URLError as e:
         st.error(
@@ -132,6 +165,24 @@ def main():
             % e.reason
         )
 
+def rander_line_graph(df, value_y):
+        fig = figure_line_grouped(
+            df.sort(pl.col("Record_count")),
+            "Record_count", 
+            value_y,
+            f"{value_y} Over Time", 
+            "Days Since Start", 
+            "Mean Daily Score", 
+            ['#FF9933','#3C9BED', '#349AC7', '#1FAB55'], 
+            col_all_cohorts,
+            True
+        )
+
+        st.plotly_chart(fig) 
+    
+def rander_histogram(df, value_x, value_y, value_color):
+    fig = match_graph_type_comparison(df, value_x, value_y, value_color, "Histogram")
+    st.plotly_chart(fig)
 
 if __name__ == "__main__":
     main()
