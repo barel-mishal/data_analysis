@@ -81,13 +81,13 @@ This bar graph would illustrate the daily scores for different patients, grouped
 
 Example 3: Scatter Plot
 
-    •    Value Of X: Resting Heart Rate
+    •    Value Of X: Resting_Heart_Rate
     •    Value Of Y: Stress
     •    Value Of Color: Cohort
     •    Graph Type: Scatter
 
 Analysis:
-The scatter plot would show the relationship between resting heart rate and stress levels, with different colors representing different cohorts. This can help identify if there is a correlation between heart rate and stress levels across different groups.
+The scatter plot would show the relationship between Resting_Heart_Rate and stress levels, with different colors representing different cohorts. This can help identify if there is a correlation between heart rate and stress levels across different groups.
 
 Example 4: Pie Chart
 
@@ -118,11 +118,11 @@ def text_analysis_T_test_example():
 	•	Value Of Y: Actual_Steps
 	•	Groups: ISR and IND
 
-Example 2: Comparing Resting Heart Rate between Two Cohorts
+Example 2: Comparing Resting_Heart_Rate between Two Cohorts
 
-	•	Purpose: To see if there is a significant difference in the average resting heart rate between patients from different cohorts (ISR vs IND).
+	•	Purpose: To see if there is a significant difference in the average Resting_Heart_Rate between patients from different cohorts (ISR vs IND).
 	•	Value Of X: Cohort
-	•	Value Of Y: Resting Heart Rate
+	•	Value Of Y: Resting_Heart_Rate
 	•	Groups: ISR and IND
 
 Example 3: Comparing Stress Levels between Two Cohorts
@@ -149,7 +149,7 @@ Example 5: Comparing Sleep Duration between Two Cohorts
 Procedure for Each Example:
 
 	1.	Select Cohort as Value Of X.
-	2.	Select the respective metric (e.g., Actual_Steps, Resting Heart Rate, Stress, Daily_score, Sleep) as Value Of Y.
+	2.	Select the respective metric (e.g., Actual_Steps, Resting_Heart_Rate, Stress, Daily_score, Sleep) as Value Of Y.
 	3.	Perform a t-test to compare the means of the selected metric between the two groups (ISR and IND).
 	4.	Interpret the t-test results:
 	•	t-statistic: Indicates the magnitude of difference between the groups.
@@ -247,7 +247,7 @@ def analyze_health_data(df: pl.DataFrame):
 
     # Fill missing values
     data = data.with_columns([
-        pl.col('Resting Heart Rate').fill_nan(pl.median('Resting Heart Rate')),
+        pl.col('Resting_Heart_Rate').fill_nan(pl.median('Resting_Heart_Rate')),
         pl.col('Stress').fill_nan(pl.median('Stress')),
         pl.col('Sleep').fill_nan(pl.median('Sleep')),
         pl.col('Daily_score').fill_nan(pl.median('Daily_score'))
