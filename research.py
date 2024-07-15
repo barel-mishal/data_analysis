@@ -52,56 +52,38 @@ def main():
 
         col1, col2 = st.columns([2, 1])
         with col1:
-            value_x = "Cohort"
-            st.write("## Cohort Analysis")
+            value_x = col_all_cohorts
+            st.write("## Cohorts Analysis")
         with col2:
             value_columns = [x for x in columns if x not in ["Patient_nmb", "Date", "Record_count", "Cohort"]]
             value_y = st.selectbox("Y Axis", value_columns, index=4)
 
+        rander_line_graph(df, value_y)
+        
+        st.write('''
+        ### Improvements
+
+        - Add an option to fill or filter out missing values.
+        - Implement a date range filter.
+        - Display additional information when hovering over data points.
+        ''')
+
         graph_type = st.selectbox("Graph Type", ["Histogram", "Box"])
 
-        rander_line_graph(df, value_y)
+        rander_histogram(df, value_x, value_y, value_x, graph_type)
 
-        rander_histogram(df, value_x, value_y, value_x)
-
-
-
+        st.write('''
+        ### TODO:
+            when cohorts are selected, the graph should update to show the selected cohorts.
+        ''')
+        plot_cohort_correlation_matrix(df.filter(pl.col(col_all_cohorts) == "ISR"), "ISR", blue_to_green)
+        plot_cohort_correlation_matrix(df.filter(pl.col(col_all_cohorts) == "IND"), "IND", orange_to_green)
+        plot_cohort_correlation_matrix(df.filter(pl.col(col_all_cohorts) == "CD"), "CD", orange_to_green)
+        plot_cohort_correlation_matrix(df.filter(pl.col(col_all_cohorts) == "BIOMDT"), "BIOMDT", orange_to_green)
 
 
 
         if False:
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                value_x = "Cohort"
-                st.write("## Cohort Analysis")
-            with col2:
-                value_columns = [x for x in columns if x not in ["Patient_nmb", "Date", "Record_count", "Cohort"]]
-
-                value_y = st.selectbox("Y Axis", value_columns, index=4)
-            graph_type = st.selectbox("Graph Type", ["Histogram", "Box"])
-            fig = match_graph_type_comparison(df, value_x, value_y, value_x, graph_type)
-            st.plotly_chart(fig)
-
-            st.write("## Line Graph")
-
-            proccess = filter_and_group_by(df, ["Record_count", "Cohort"], value_y)
-
-            fig = figure_line_grouped(
-                proccess, 
-                "Record_count", 
-                value_y,
-                f"{value_y} Over Time", 
-                "Days Since Start", 
-                "Mean Daily Score", 
-                ['#FF9933','#3C9BED'], 
-                "Cohort",
-                True
-            )
-
-            st.plotly_chart(fig) 
-
-            plot_cohort_correlation_matrix(df.filter(pl.col("Cohort") == "ISR"), "ISR", blue_to_green)
-            plot_cohort_correlation_matrix(df.filter(pl.col("Cohort") == "IND"), "IND", orange_to_green)
 
             col1, col2, col3, col4 = st.columns(4)
             with col1: 
@@ -166,8 +148,10 @@ def main():
         )
 
 def rander_line_graph(df, value_y):
+        proccess = filter_and_group_by(df, ["Record_count", col_all_cohorts], value_y)
+        
         fig = figure_line_grouped(
-            df.sort(pl.col("Record_count")),
+            proccess, 
             "Record_count", 
             value_y,
             f"{value_y} Over Time", 
@@ -180,8 +164,8 @@ def rander_line_graph(df, value_y):
 
         st.plotly_chart(fig) 
     
-def rander_histogram(df, value_x, value_y, value_color):
-    fig = match_graph_type_comparison(df, value_x, value_y, value_color, "Histogram")
+def rander_histogram(df, value_x, value_y, value_color, graph_type="Histogram"):
+    fig = match_graph_type_comparison(df, value_x, value_y, value_color, graph_type)
     st.plotly_chart(fig)
 
 if __name__ == "__main__":
