@@ -66,6 +66,7 @@ def main():
         - Add an option to fill or filter out missing values.
         - Implement a date range filter.
         - Display additional information when hovering over data points.
+        - use color persistent to represent different cohorts.
         ''')
 
         graph_type = st.selectbox("Graph Type", ["Histogram", "Box"])
@@ -83,7 +84,9 @@ def main():
 
         st.write('''
         ### TODO:
-                 ADD a t-test for each cohort
+                 ADD a t-test for each cohort if two cohorts are selected.
+                 ADD a anova test for more than two cohorts.
+
         ''')
 
 
