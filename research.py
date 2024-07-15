@@ -81,6 +81,10 @@ def main():
         plot_cohort_correlation_matrix(df.filter(pl.col(col_all_cohorts) == "CD"), "CD", orange_to_green)
         plot_cohort_correlation_matrix(df.filter(pl.col(col_all_cohorts) == "BIOMDT"), "BIOMDT", orange_to_green)
 
+        st.write('''
+        ### TODO:
+                 ADD a t-test for each cohort
+        ''')
 
 
         if False:
