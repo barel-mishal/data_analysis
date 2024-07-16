@@ -3,7 +3,7 @@ import polars as pl
 from urllib.error import URLError
 from analysis.correlation_metrices import plot_cohort_correlation_matrix
 from analysis.match_graph_type_comparison import match_graph_type_comparison
-from analysis.old import analyze_health_data, perform_graph_analysis, perform_t_tests, text_analysis_T_test_example, use_parquet_file_by_upload
+from analysis.old import analyze_health_data, perform_graph_analysis, perform_t_tests_two_sample, text_analysis_T_test_example, use_parquet_file_by_upload
 from analysis.over_time_analysis_comparssion import figure_line_grouped, filter_and_group_by
 
 
@@ -37,12 +37,13 @@ def main():
             return
         df = df.with_columns([pl.col("Date").cast(pl.Datetime)])
         df = df.sort("Date")
-        columns = ["Cohort", *filter(lambda x: x != "Cohort", df.columns)]
+        columns = [col_all_cohorts, *filter(lambda x: x != col_all_cohorts, df.columns)]
         cohorts = sorted(df.select(col_all_cohorts).unique().to_pandas().values.flatten())
 
         st.write("## Schema")
         st.write(df.schema)
         st.write("## Data")
+        st.write('TODO: sticky header for the selected cohorts')
         cols = st.multiselect("Filter Cohorts", cohorts)
 
         df = df.filter(pl.col(col_all_cohorts).is_in(cols))
@@ -73,19 +74,24 @@ def main():
 
         rander_histogram(df, value_x, value_y, value_x, graph_type)
 
-        st.write('''
-        ### TODO:
-            when cohorts are selected, the graph should update to show the selected cohorts.
-        ''')
-        plot_cohort_correlation_matrix(df.filter(pl.col(col_all_cohorts) == "ISR"), "ISR", blue_to_green)
-        plot_cohort_correlation_matrix(df.filter(pl.col(col_all_cohorts) == "IND"), "IND", orange_to_green)
-        plot_cohort_correlation_matrix(df.filter(pl.col(col_all_cohorts) == "CD"), "CD", orange_to_green)
-        plot_cohort_correlation_matrix(df.filter(pl.col(col_all_cohorts) == "BIOMDT"), "BIOMDT", orange_to_green)
+        rander_metrics(df, cols)
 
         st.write('''
-        ### TODO:
-                 ADD a t-test for each cohort if two cohorts are selected.
-                 ADD a anova test for more than two cohorts.
+                 # t-test
+        ''')
+
+        match len(cols):
+            case 2:
+                rander_t_test(df, value_columns)
+            case 3:
+                st.write("TODO: Implement anova test")
+            case _:
+                st.write("Please select two cohorts to perform a t-test.")
+
+        st.write('''
+        ### TODOs
+
+        - Make - Paired t-test (dependent t-test): Compares the means of the same group at different times (e.g., before and after a treatment).
 
         ''')
 
@@ -118,25 +124,6 @@ def main():
                 st.error(f"Please select different values for X and Y axes. {df.columns}")
             else:
                 perform_graph_analysis(df, value_x, value_y, value_color, graph_type)
-            # Buttons to perform t-tests
-
-            col1, col2 = st.columns(2)
-            with col1: 
-                value_x = st.selectbox(
-                    "Independent 1 x", columns
-                )
-            with col2:
-                value_y = st.selectbox(
-                    "Independent 2 y", columns, index=3
-                )
-            st.write("## Perform t-tests")
-            if value_x and value_y:
-                t_test_result = perform_t_tests(df, value_x, value_y)
-
-                st.write("### t-test Result")
-                st.write(t_test_result)
-                text_analysis_T_test_example()
-
             
             correlation_matrix, fig = analyze_health_data(df)
             st.header("Correlation Matrix")
@@ -174,6 +161,29 @@ def rander_line_graph(df, value_y):
 def rander_histogram(df, value_x, value_y, value_color, graph_type="Histogram"):
     fig = match_graph_type_comparison(df, value_x, value_y, value_color, graph_type)
     st.plotly_chart(fig)
+
+def rander_metrics(df: pl.DataFrame, cohors: list):
+        for cohort in cohors:
+            plot_cohort_correlation_matrix(df.filter(pl.col(col_all_cohorts) == cohort), cohort, blue_to_green)
+
+def rander_t_test(df: pl.DataFrame, columns: list):
+    col1, col2 = st.columns(2)
+    with col1: 
+        value_x = st.selectbox(
+            "Independent 1", columns
+        )
+    with col2:
+        value_y = st.selectbox(
+            "Independent 2", columns, index=3
+        )
+    st.write("## Perform t-tests")
+    if value_x and value_y:
+        perform_t_tests_two_sample(df, value_x, value_y)
+        text_analysis_T_test_example()
+
+    
+
+
 
 if __name__ == "__main__":
     main()

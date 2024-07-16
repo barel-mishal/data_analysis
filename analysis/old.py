@@ -114,36 +114,36 @@ def text_analysis_T_test_example():
     st.write("""xample 1: Comparing Actual_Steps between Two Cohorts
 
 	•	Purpose: To determine if there is a significant difference in the average number of steps taken between patients in different cohorts (ISR vs IND).
-	•	Value Of X: Cohort
-	•	Value Of Y: Actual_Steps
+	•	Value Of 1: Cohort
+	•	Value Of 2: Actual_Steps
 	•	Groups: ISR and IND
 
 Example 2: Comparing Resting_Heart_Rate between Two Cohorts
 
 	•	Purpose: To see if there is a significant difference in the average Resting_Heart_Rate between patients from different cohorts (ISR vs IND).
-	•	Value Of X: Cohort
-	•	Value Of Y: Resting_Heart_Rate
+	•	Value Of 1: Cohort
+	•	Value Of 2: Resting_Heart_Rate
 	•	Groups: ISR and IND
 
 Example 3: Comparing Stress Levels between Two Cohorts
 
 	•	Purpose: To assess whether the stress levels differ significantly between patients in different cohorts (ISR vs IND).
-	•	Value Of X: Cohort
-	•	Value Of Y: Stress
+	•	Value Of 1: Cohort
+	•	Value Of 2: Stress
 	•	Groups: ISR and IND
 
 Example 4: Comparing Daily_score between Two Cohorts
 
 	•	Purpose: To investigate if the daily scores are significantly different between patients from different cohorts (ISR vs IND).
-	•	Value Of X: Cohort
-	•	Value Of Y: Daily_score
+	•	Value Of 1: Cohort
+	•	Value Of 2: Daily_score
 	•	Groups: ISR and IND
 
 Example 5: Comparing Sleep Duration between Two Cohorts
 
 	•	Purpose: To determine if there is a significant difference in the average sleep duration between patients from different cohorts (ISR vs IND).
-	•	Value Of X: Cohort
-	•	Value Of Y: Sleep
+	•	Value Of 1: Cohort
+	•	Value Of 2: Sleep
 	•	Groups: ISR and IND
 
 Procedure for Each Example:
@@ -157,38 +157,51 @@ Procedure for Each Example:
              
 """)
 
-def perform_t_tests(df: pl.DataFrame, value_x: str, value_y: str):
+def perform_t_tests_two_sample(df: pl.DataFrame, value_x: str, value_y: str):
+    # Step 1: Input Validation
     if value_x not in df.columns or value_y not in df.columns:
-        return "Invalid columns for t-test."
+        st.write("Error: Invalid columns for t-test.")
+        return 
 
     unique_values = df.select(value_x).unique().to_numpy()
     if len(unique_values) != 2:
-        return "t-test requires exactly two groups."
+        st.write("Error: t-test requires exactly two groups.")
+        return 
 
-    group_1 = df.filter(pl.col(value_x) == unique_values[0])
-    group_2 = df.filter(pl.col(value_x) == unique_values[1])
+    # Step 2: Data Preprocessing
+    group_1 = df.filter(pl.col(value_x) == unique_values[0]).drop_nulls(value_y)
+    group_2 = df.filter(pl.col(value_x) == unique_values[1]).drop_nulls(value_y)
 
     if len(group_1) < 2 or len(group_2) < 2:
-        return "Not enough data for t-test."
+        st.write("Error: Not enough data for t-test after dropping NaN values.")
+        return 
 
-    # Drop NaN values
-    group_1 = group_1.drop_nulls(value_y)
-    group_2 = group_2.drop_nulls(value_y)
+    # Step 3: Variance Check
+    var_group_1 = np.var(group_1.select(value_y).to_numpy())
+    var_group_2 = np.var(group_2.select(value_y).to_numpy())
 
-    # Ensure there is variance in both groups
-    if np.var(group_1.select(value_y).to_numpy()) == 0 or np.var(group_2.select(value_y).to_numpy()) == 0:
-        return "One of the groups has no variance."
+    if var_group_1 == 0 or var_group_2 == 0:
+        st.write("Error: One of the groups has no variance.")
+        return 
 
+    # Step 4: T-test Execution
     t_stat, p_value = ttest_ind(group_1.select(value_y).to_numpy(), group_2.select(value_y).to_numpy(), equal_var=False)
 
-    result = f"T-test results: t-statistic = {t_stat}, p-value = {p_value}"
+    # Step 5: Result Interpretation
+    alpha = 0.05
+    conclusion = "reject" if p_value < alpha else "fail to reject"
+    result = (
+        f"T-test results: t-statistic = {t_stat[0]:.4f}, p-value = {p_value[0]:.4f}\n"
+        f"Conclusion: Based on the p-value, we {conclusion} the null hypothesis at the {alpha} significance level."
+    )
+
+    # Step 6: Visualization
+    fig = px.box(df.to_pandas(), x=value_x, y=value_y, title=f'Box Plot of {value_y} by {value_x}')
     
-    # Visualize the results with a box plot
-    fig = px.box(df.to_pandas(), x=value_x, y=value_y, title='Box Plot of ' + value_y + ' by ' + value_x)
-    st.write("### Box Plot of " + value_y + " by " + value_x)
+    # Display the results and the plot
+    st.write(result)
     st.plotly_chart(fig)
     
-    return result
     
 
 def perform_graph_analysis(
