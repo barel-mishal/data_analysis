@@ -244,7 +244,6 @@ def analyze_health_data(df: pl.DataFrame):
 
     # Convert 'Date' to datetime and sort by date
     data = df
-    # data = data.with_columns(pl.col('Date').dt.datetime().alias('Date'))
     data = data.sort('Record_count')
 
     data = data.with_columns([

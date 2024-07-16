@@ -94,43 +94,13 @@ def main():
         - Make - Paired t-test (dependent t-test): Compares the means of the same group at different times (e.g., before and after a treatment).
 
         ''')
+        
+        correlation_matrix, fig = analyze_health_data(df)
+        st.header("Correlation Matrix")
+        st.write(correlation_matrix)
 
-
-        if False:
-
-            col1, col2, col3, col4 = st.columns(4)
-            with col1: 
-                value_x = st.selectbox(
-                    "Value Of X", columns
-                )
-            with col2:
-                value_y = st.selectbox(
-                    "Value Of Y", columns, index=1
-                )
-            with col3:
-                value_color = st.selectbox(
-                    "Value Of Color", set([None, *df.columns]), index=0
-                )
-            with col4:
-                graph_type = st.selectbox(
-                    "Graph Type",
-                    ["Bar", "Line", "Scatter", "Pie", "Histogram"],
-                )
-            if not value_x:
-                st.error(f"Please select a value for X axis. {df.columns}")
-            elif not value_y:
-                st.error(f"Please select a value for Y axis. {df.columns}")
-            elif value_x == value_y:
-                st.error(f"Please select different values for X and Y axes. {df.columns}")
-            else:
-                perform_graph_analysis(df, value_x, value_y, value_color, graph_type)
-            
-            correlation_matrix, fig = analyze_health_data(df)
-            st.header("Correlation Matrix")
-            st.write(correlation_matrix)
-
-            st.header("daily Trends")
-            st.plotly_chart(fig)
+        st.header("daily Trends")
+        st.plotly_chart(fig)
 
     except URLError as e:
         st.error(
@@ -183,6 +153,36 @@ def rander_t_test(df: pl.DataFrame, columns: list):
 
     
 
+def sticky_htmlelelement(value: list[str]):
+    st.markdown(
+    """
+    <style>
+    .sticky {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        background-color: white;
+        z-index: 1000;
+        border: 1px solid #e6e6e6;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+    )
+
+    # Create a sticky container
+    st.markdown('<div class="sticky">', unsafe_allow_html=True)
+
+    # List of cohorts
+    cohorts = ["Cohort 1", "Cohort 2", "Cohort 3"]
+
+    # Multiselect widget
+    selected_cohorts = st.multiselect("Filter Cohorts", cohorts)
+
+    # Close the sticky container
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    return selected_cohorts
 
 
 if __name__ == "__main__":
