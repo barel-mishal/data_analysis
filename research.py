@@ -5,6 +5,7 @@ from analysis.correlation_metrices import plot_cohort_correlation_matrix
 from analysis.match_graph_type_comparison import match_graph_type_comparison
 from analysis.old import analyze_health_data, perform_graph_analysis, perform_t_tests_two_sample, text_analysis_T_test_example, use_parquet_file_by_upload
 from analysis.over_time_analysis_comparssion import figure_line_grouped, filter_and_group_by
+from anova import perform_anova
 
 
 # TODO: Add template 
@@ -76,15 +77,21 @@ def main():
 
         rander_metrics(df, cols)
 
-        st.write('''
-                 # t-test
-        ''')
 
         match len(cols):
             case 2:
+                st.write('''
+                        # t-test
+                ''')
                 rander_t_test(df, value_columns)
             case 3:
-                st.write("TODO: Implement anova test")
+                st.write('''
+                        # ANOVA
+                ''')
+                parameters = ['Daily_score', 'Actual_Steps', 'Resting_Heart_Rate', 'Stress', 'Sleep']
+                # Display the results
+                
+                ranrder_anova(df, cohorts, parameters)
             case _:
                 st.write("Please select two cohorts to perform a t-test.")
 
@@ -184,6 +191,15 @@ def sticky_htmlelelement(value: list[str]):
 
     return selected_cohorts
 
+def ranrder_anova(df, cohorts, parameters):
+    anova_results = perform_anova(df, cohorts, parameters)
+    # Display the results
+    st.header("ANOVA Results")
+    for param, result in anova_results.items():
+        st.subheader(f'Results for {param}')
+        st.write(f'F-value: {result["F-value"]}')
+        st.write(f'p-value: {result["p-value"]}')
+        st.write("---")
 
 if __name__ == "__main__":
     main()
