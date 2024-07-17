@@ -84,7 +84,7 @@ def main():
                         # t-test
                 ''')
                 rander_t_test(df, value_columns)
-            case 3:
+            case 3 | 4:
                 st.write('''
                         # ANOVA
                 ''')
