@@ -5,7 +5,7 @@ from analysis.correlation_metrices import plot_cohort_correlation_matrix
 from analysis.match_graph_type_comparison import match_graph_type_comparison
 from analysis.old import analyze_health_data, perform_graph_analysis, perform_t_tests_two_sample, text_analysis_T_test_example, use_parquet_file_by_upload
 from analysis.over_time_analysis_comparssion import figure_line_grouped, filter_and_group_by
-from anova import perform_anova
+from anova import anova_results_to_dataframe, perform_anova
 
 
 # TODO: Add template 
@@ -91,7 +91,7 @@ def main():
                 parameters = ['Daily_score', 'Actual_Steps', 'Resting_Heart_Rate', 'Stress', 'Sleep']
                 # Display the results
                 
-                ranrder_anova(df, cohorts, parameters)
+                render_anova(df, cohorts, parameters)
             case _:
                 st.write("Please select two cohorts to perform a t-test.")
 
@@ -191,14 +191,36 @@ def sticky_htmlelelement(value: list[str]):
 
     return selected_cohorts
 
-def ranrder_anova(df, cohorts, parameters):
+def render_anova(df, cohorts, parameters):
     anova_results = perform_anova(df, cohorts, parameters)
     # Display the results
     st.header("ANOVA Results")
+    st.write("This section presents the results of an ANOVA analysis performed to compare several health metrics (Daily_score, Actual_Steps, Resting_Heart_Rate, Stress, Sleep) across different cohorts. The analysis also includes checks for ANOVA assumptions, specifically the Shapiro-Wilk test for normality and Levene’s test for homogeneity of variances.")
     for param, result in anova_results.items():
         st.subheader(f'Results for {param}')
         st.write(f'F-value: {result["F-value"]}')
         st.write(f'p-value: {result["p-value"]}')
+        
+        # Interpretation of results
+        if result["p-value"] < 0.05:
+            st.write(f"The differences in {param} between the cohorts are statistically significant (p < 0.05).")
+        else:
+            st.write(f"The differences in {param} between the cohorts are not statistically significant (p >= 0.05).")
+        
+        st.write("Normality test p-values for each cohort:")
+        for i, p_val in enumerate(result['normality']):
+            st.write(f"Cohort {i+1}: p-value = {p_val}")
+        
+        st.write(f"Levene's test for homogeneity of variances p-value: {result['homogeneity']}")
+        
+        if all(p >= 0.05 for p in result['normality']) and result['homogeneity'] >= 0.05:
+            st.write("ANOVA assumptions are satisfied.")
+        else:
+            st.write("ANOVA assumptions are violated.")
+
+        st.write("Table of results:")
+        st.write(anova_results_to_dataframe(anova_results).to_pandas())
+        
         st.write("---")
 
 if __name__ == "__main__":
