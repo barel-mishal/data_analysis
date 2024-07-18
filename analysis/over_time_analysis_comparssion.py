@@ -1,8 +1,6 @@
 import polars as pl
 import plotly.express as px
 
-
-
 def figure_line_grouped(
         df: pl.DataFrame, 
         x: str, 
