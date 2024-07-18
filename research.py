@@ -40,7 +40,6 @@ def main():
         df = df.sort("Date")
         columns = [col_all_cohorts, *filter(lambda x: x != col_all_cohorts, df.columns)]
         cohorts = sorted(df.select(col_all_cohorts).unique().to_pandas().values.flatten())
-
         st.write("## Schema")
         st.write(df.schema)
         st.write("## Data")
@@ -128,7 +127,12 @@ def rander_line_graph(df, value_y):
             f"{value_y} Over Time", 
             "Days Since Start", 
             "Mean Daily Score", 
-            ['#FF9933','#3C9BED', '#349AC7', '#1FAB55'], 
+            [
+            '#E67300',  # BIOMDT - כתום כהה
+            '#005B96',  # CD - כחול כהה
+            '#FFD700',  # IND - צהוב זהב
+            '#228B22'   # ISR - ירוק כהה
+            ], 
             col_all_cohorts,
             True
         )
