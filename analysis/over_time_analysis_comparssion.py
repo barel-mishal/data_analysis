@@ -53,10 +53,6 @@ def figure_line_grouped(
 def filter_and_group_by(df: pl.DataFrame, group_by: list, agg_by: str = "Daily_score"):
     return df.filter(
             pl.col("Daily_score").is_not_null(),
-            pl.when(pl.col("Cohort") == "ISR")\
-                .then(pl.col("Record_count").le(26))\
-                .when(pl.col("Cohort") == "IND")\
-                .then(pl.col("Record_count").le(29))
         )\
         .group_by(group_by)\
         .agg(pl.col(agg_by).mean().alias(agg_by))\
