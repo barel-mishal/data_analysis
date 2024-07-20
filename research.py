@@ -65,7 +65,6 @@ def main():
         ### Improvements
 
         - Add an option to fill or filter out missing values.
-        - Implement a date range filter.
         - Display additional information when hovering over data points.
         - use color persistent to represent different cohorts.
         ''')
