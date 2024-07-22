@@ -1,6 +1,7 @@
 import polars as pl
 import plotly.express as px
 
+import streamlit as st
 def figure_line_grouped(
         df: pl.DataFrame, 
         x: str, 
@@ -59,3 +60,13 @@ def filter_and_group_by(df: pl.DataFrame, group_by: list, agg_by: str = "Daily_s
             pl.count().alias("people_count")
         ])\
         .sort(group_by)
+
+def filter_by_people_count(df: pl.DataFrame, group_by: str):
+    # https://stackoverflow.com/questions/72821244/polars-get-grouped-rows-where-column-value-is-maximum
+    half_max_people_count = (
+        pl.col('people_count') >= pl.col('people_count').max().over("All_Cohorts") / 2
+    ).alias("half_max_people_count")
+
+    df_filtered = df.with_columns([half_max_people_count])
+    
+    return df_filtered

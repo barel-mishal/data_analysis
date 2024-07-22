@@ -4,7 +4,7 @@ from urllib.error import URLError
 from analysis.correlation_metrices import plot_cohort_correlation_matrix
 from analysis.match_graph_type_comparison import match_graph_type_comparison
 from analysis.old import analyze_health_data, perform_graph_analysis, perform_t_tests_two_sample, text_analysis_T_test_example, use_parquet_file_by_upload
-from analysis.over_time_analysis_comparssion import figure_line_grouped, filter_and_group_by
+from analysis.over_time_analysis_comparssion import figure_line_grouped, filter_and_group_by, filter_by_people_count
 from anova import anova_results_to_dataframe, perform_anova
 
 
@@ -116,15 +116,15 @@ def main():
             % e.reason
         )
 
-def rander_line_graph(df, value_y):
+def rander_line_graph(df: pl.DataFrame, value_y):
         proccess = filter_and_group_by(df, ["Record_count", col_all_cohorts], value_y)
-
-        st.write("#### Data")
+        proccess = filter_by_people_count(proccess, proccess.select(col_all_cohorts).unique())
+        st.write("#### Data before filtering by count")
         st.write(proccess.to_pandas())
         st.write("#### Graph")
         
         fig = figure_line_grouped(
-            proccess, 
+            proccess.filter(pl.col("half_max_people_count")), 
             "Record_count", 
             value_y,
             f"{value_y} Over Time", 
@@ -137,7 +137,6 @@ def rander_line_graph(df, value_y):
             '#228B22'   # ISR - ירוק כהה
             ], 
             col_all_cohorts,
-            
             True
         )
 
