@@ -119,7 +119,9 @@ def main():
 def rander_line_graph(df, value_y):
         proccess = filter_and_group_by(df, ["Record_count", col_all_cohorts], value_y)
 
+        st.write("#### Data")
         st.write(proccess.to_pandas())
+        st.write("#### Graph")
         
         fig = figure_line_grouped(
             proccess, 
@@ -127,7 +129,7 @@ def rander_line_graph(df, value_y):
             value_y,
             f"{value_y} Over Time", 
             "Days Since Start", 
-            "Mean Daily Score", 
+            "Mean Daily Score",  
             [
             '#E67300',  # BIOMDT - כתום כהה
             '#005B96',  # CD - כחול כהה
@@ -135,6 +137,7 @@ def rander_line_graph(df, value_y):
             '#228B22'   # ISR - ירוק כהה
             ], 
             col_all_cohorts,
+            
             True
         )
 

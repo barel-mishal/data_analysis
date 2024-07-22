@@ -26,7 +26,8 @@ def figure_line_grouped(
         title=title, 
         labels=labels,
         color_discrete_sequence=color_discrete_sequence,  # Ensure this is a list of color strings
-        markers=markers  # Add markers to the line if True
+        markers=markers,  # Add markers to the line if True
+        hover_data={"people_count": True}
     )
 
     # Improve the aesthetics
