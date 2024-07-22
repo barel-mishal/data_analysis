@@ -53,5 +53,8 @@ def filter_and_group_by(df: pl.DataFrame, group_by: list, agg_by: str = "Daily_s
             pl.col("Daily_score").is_not_null(),
         )\
         .group_by(group_by)\
-        .agg(pl.col(agg_by).mean().alias(agg_by))\
+        .agg([
+            pl.col(agg_by).mean().alias(agg_by),
+            pl.count().alias("people_count")
+        ])\
         .sort(group_by)

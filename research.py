@@ -118,6 +118,8 @@ def main():
 
 def rander_line_graph(df, value_y):
         proccess = filter_and_group_by(df, ["Record_count", col_all_cohorts], value_y)
+
+        st.write(proccess.to_pandas())
         
         fig = figure_line_grouped(
             proccess, 
