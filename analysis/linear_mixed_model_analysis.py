@@ -11,14 +11,18 @@ from typing import Optional
 # Define the function for analysis
 def linear_mixed_model_analysis(df: pl.DataFrame, dependent_var: str, group_var: str, time_var: Optional[str] = 'Record_count') -> None:
     # Convert to pandas DataFrame for statsmodels
-    
+    half_max_people_count = (
+        pl.col('people_count') >= pl.col('people_count').max().over("All_Cohorts") / 2
+    ).alias("half_max_people_count")
     # Ensure Patient_nmb is treated as a categorical variable
 
     df = df.with_columns([
         df['Patient_nmb'].cast(pl.Categorical),
         df[group_var].cast(pl.Categorical),
-        
-    ]).filter(pl.col(dependent_var).is_not_null())
+        half_max_people_count
+    ]).filter([pl.col("half_max_people_count"), pl.col(dependent_var).is_not_null()]).sort([time_var, group_var])
+
+    st.write(df.to_pandas())
 
     df_pd = df.to_pandas()
 
@@ -40,7 +44,7 @@ def linear_mixed_model_analysis(df: pl.DataFrame, dependent_var: str, group_var:
 
     # # Plot the dependent variable over time for each cohort
     # Calculate mean and confidence interval for each group over time
-    grouped_data = df_pd.groupby([group_var, time_var])[dependent_var].agg(['mean', 'sem']).reset_index()
+    grouped_data = df_pd.groupby([group_var, time_var], observed=False)[dependent_var].agg(['mean', 'sem']).reset_index()
     grouped_data['lower_ci'] = grouped_data['mean'] - 1.96 * grouped_data['sem']
     grouped_data['upper_ci'] = grouped_data['mean'] + 1.96 * grouped_data['sem']
 

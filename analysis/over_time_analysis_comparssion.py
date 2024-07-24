@@ -51,6 +51,7 @@ def figure_line_grouped(
     return fig
 
 def filter_and_group_by(df: pl.DataFrame, group_by: list, agg_by: str = "Daily_score"):
+    
     return df.filter(
             pl.col("Daily_score").is_not_null(),
         )\
@@ -70,3 +71,14 @@ def filter_by_people_count(df: pl.DataFrame, group_by: str):
     df_filtered = df.with_columns([half_max_people_count])
     
     return df_filtered
+
+def create_pepole_count_column(df: pl.DataFrame, group_by: list, agg_by: str = "Daily_score"):
+        grouped = df.group_by(group_by, maintain_order=True)\
+            .agg([
+                pl.count().alias("people_count")
+            ])\
+            .sort(group_by)
+        
+        df = df.join(grouped, on=group_by, how="left")
+
+        return df

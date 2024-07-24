@@ -5,7 +5,7 @@ from analysis.correlation_metrices import plot_cohort_correlation_matrix
 from analysis.linear_mixed_model_analysis import linear_mixed_model_analysis
 from analysis.match_graph_type_comparison import match_graph_type_comparison
 from analysis.old import analyze_health_data, perform_graph_analysis, perform_t_tests_two_sample, text_analysis_T_test_example, use_parquet_file_by_upload
-from analysis.over_time_analysis_comparssion import figure_line_grouped, filter_and_group_by, filter_by_people_count
+from analysis.over_time_analysis_comparssion import create_pepole_count_column, figure_line_grouped, filter_and_group_by, filter_by_people_count
 from anova import anova_results_to_dataframe, perform_anova
 
 
@@ -39,6 +39,8 @@ def main():
             return
         df = df.with_columns([pl.col("Date").cast(pl.Datetime)])
         df = df.sort("Date")
+        df = create_pepole_count_column(df, ["Record_count", col_all_cohorts], "Daily_score")
+
         columns = [col_all_cohorts, *filter(lambda x: x != col_all_cohorts, df.columns)]
         cohorts = sorted(df.select(col_all_cohorts).unique().to_pandas().values.flatten())
         st.write("## Schema")
@@ -49,6 +51,8 @@ def main():
         
         df_filtered = df.filter(pl.col(col_all_cohorts).is_in(cols))
         st.write(df_filtered.to_pandas())
+
+        
 
         value_columns = [x for x in columns if x not in ["Patient_nmb", "Date", "Record_count", "Cohort"]]
 
@@ -107,7 +111,7 @@ def main():
                      Note in python the formula is: mixedlm("Daily_score ~ Record_count * All_Cohorts", df_pd, groups=Patient_nmb)
             ''')
 
-            linear_mixed_model_analysis(df, "Daily_score", col_all_cohorts, "Record_count")
+            linear_mixed_model_analysis(df_filtered, "Daily_score", col_all_cohorts, "Record_count")
 
 
         # st.write('''
