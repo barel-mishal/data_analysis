@@ -20,11 +20,7 @@ def linear_mixed_model_analysis(df: pl.DataFrame, dependent_var: str, group_var:
         
     ]).filter(pl.col(dependent_var).is_not_null())
 
-    st.write(df.schema)
     df_pd = df.to_pandas()
-
-    st.write(df_pd.dtypes)
-
 
     # # Model formula
     formula = f"{dependent_var} ~ {time_var} * {group_var}"

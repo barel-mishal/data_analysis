@@ -104,12 +104,12 @@ def main():
             linear_mixed_model_analysis(df, "Daily_score", col_all_cohorts, "Record_count")
 
 
-        st.write('''
-        ### TODOs
+        # st.write('''
+        # ### TODOs
 
-        - Make - Paired t-test (dependent t-test): Compares the means of the same group at different times (e.g., before and after a treatment).
+        # - Make - Paired t-test (dependent t-test): Compares the means of the same group at different times (e.g., before and after a treatment).
 
-        ''')
+        # ''')
         
         correlation_matrix, fig = analyze_health_data(df_filtered)
         st.header("Correlation Matrix")
