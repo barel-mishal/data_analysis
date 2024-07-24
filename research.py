@@ -99,8 +99,14 @@ def main():
             ### Linear Mixed Model Analysis
 
             This section presents the results of a linear mixed model analysis performed to compare the daily score across different cohorts. The analysis includes checks for the assumptions of linearity, normality, and homoscedasticity. The model is fitted using the `statsmodels` library.
-
             ''')
+            st.write('''
+                     The equation is: Daily_score ~ Record_count * All_Cohorts (1 | Patient_nmb)
+            ''')
+            st.write('''
+                     Note in python the formula is: mixedlm("Daily_score ~ Record_count * All_Cohorts", df_pd, groups=Patient_nmb)
+            ''')
+
             linear_mixed_model_analysis(df, "Daily_score", col_all_cohorts, "Record_count")
 
 

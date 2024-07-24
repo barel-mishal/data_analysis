@@ -39,7 +39,7 @@ def linear_mixed_model_analysis(df: pl.DataFrame, dependent_var: str, group_var:
     st.write("### Data Visualization")
 
     # # Plot the dependent variable over time for each cohort
-# Calculate mean and confidence interval for each group over time
+    # Calculate mean and confidence interval for each group over time
     grouped_data = df_pd.groupby([group_var, time_var])[dependent_var].agg(['mean', 'sem']).reset_index()
     grouped_data['lower_ci'] = grouped_data['mean'] - 1.96 * grouped_data['sem']
     grouped_data['upper_ci'] = grouped_data['mean'] + 1.96 * grouped_data['sem']
