@@ -2,6 +2,7 @@ import streamlit as st
 import polars as pl
 from urllib.error import URLError
 from analysis.correlation_metrices import plot_cohort_correlation_matrix
+from analysis.linear_mixed_model_analysis import linear_mixed_model_analysis
 from analysis.match_graph_type_comparison import match_graph_type_comparison
 from analysis.old import analyze_health_data, perform_graph_analysis, perform_t_tests_two_sample, text_analysis_T_test_example, use_parquet_file_by_upload
 from analysis.over_time_analysis_comparssion import figure_line_grouped, filter_and_group_by, filter_by_people_count
@@ -45,9 +46,9 @@ def main():
         st.write("## Data")
         st.write('TODO: sticky header for the selected cohorts')
         cols = st.multiselect("Filter Cohorts", cohorts)
-
-        df = df.filter(pl.col(col_all_cohorts).is_in(cols))
-        st.write(df.to_pandas())
+        
+        df_filtered = df.filter(pl.col(col_all_cohorts).is_in(cols))
+        st.write(df_filtered.to_pandas())
 
         value_columns = [x for x in columns if x not in ["Patient_nmb", "Date", "Record_count", "Cohort"]]
 
@@ -59,7 +60,7 @@ def main():
             value_columns = [x for x in columns if x not in ["Patient_nmb", "Date", "Record_count", "Cohort"]]
             value_y = st.selectbox("Y Axis", value_columns, index=4)
 
-        rander_line_graph(df, value_y)
+        rander_line_graph(df_filtered, value_y)
         
         st.write('''
         ### Improvements
@@ -71,9 +72,9 @@ def main():
 
         graph_type = st.selectbox("Graph Type", ["Histogram", "Box"])
 
-        rander_histogram(df, value_x, value_y, value_x, graph_type)
+        rander_histogram(df_filtered, value_x, value_y, value_x, graph_type)
 
-        rander_metrics(df, cols)
+        rander_metrics(df_filtered, cols)
 
 
         match len(cols):
@@ -81,7 +82,7 @@ def main():
                 st.write('''
                         # t-test
                 ''')
-                rander_t_test(df, value_columns)
+                rander_t_test(df_filtered, value_columns)
             case 3 | 4:
                 st.write('''
                         # ANOVA
@@ -89,9 +90,19 @@ def main():
                 parameters = ['Daily_score', 'Actual_Steps', 'Resting_Heart_Rate', 'Stress', 'Sleep']
                 # Display the results
                 
-                render_anova(df, cohorts, parameters)
+                render_anova(df_filtered, cohorts, parameters)
             case _:
                 st.write("Please select two cohorts to perform a t-test.")
+
+        if (len(cols) > 1):
+            st.write('''
+            ### Linear Mixed Model Analysis
+
+            This section presents the results of a linear mixed model analysis performed to compare the daily score across different cohorts. The analysis includes checks for the assumptions of linearity, normality, and homoscedasticity. The model is fitted using the `statsmodels` library.
+
+            ''')
+            linear_mixed_model_analysis(df, "Daily_score", col_all_cohorts, "Record_count")
+
 
         st.write('''
         ### TODOs
@@ -100,7 +111,7 @@ def main():
 
         ''')
         
-        correlation_matrix, fig = analyze_health_data(df)
+        correlation_matrix, fig = analyze_health_data(df_filtered)
         st.header("Correlation Matrix")
         st.write(correlation_matrix)
 
