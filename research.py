@@ -78,7 +78,8 @@ def main():
 
         rander_histogram(df_filtered, value_x, value_y, value_x, graph_type)
 
-        rander_metrics(df_filtered, cols)
+        droped_cols_df = df_filtered.drop("people_count")
+        rander_metrics(droped_cols_df, cols)
 
 
         match len(cols):
