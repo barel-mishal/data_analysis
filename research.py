@@ -78,7 +78,7 @@ def main():
 
         rander_histogram(df_filtered, value_x, value_y, value_x, graph_type)
 
-        droped_cols_df = df_filtered.drop("people_count")
+        droped_cols_df = df_filtered.drop(["people_count", "Record_count"])
         rander_metrics(droped_cols_df, cols)
 
 

@@ -37,6 +37,8 @@ def plot_cohort_correlation_matrix(df: pl.DataFrame, cohort: pl.String, color_sc
     mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
     corr_matrix_masked = corr_matrix.to_pandas().mask(mask)
 
+    px.colors.diverging.RdBu.reverse()
+
     # Create the heatmap
     fig = px.imshow(
         corr_matrix_masked,
