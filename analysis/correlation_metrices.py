@@ -27,7 +27,7 @@ def correlation_matrix_with_p_values(df: pl.DataFrame):
     pvals_df = pl.DataFrame(pvals, schema=corr_matrix.schema)
     return corr_matrix, pvals_df
 
-def plot_cohort_correlation_matrix(df: pl.DataFrame, cohort: pl.String, color_scale=px.colors.sequential.Viridis):
+def plot_cohort_correlation_matrix(df: pl.DataFrame, cohort: pl.String, color_scale=px.colors.sequential.RdBu):
     # Filter the DataFrame for the specified cohort and calculate the correlation matrix
     corr_matrix, pvals_df = correlation_matrix_with_p_values(df)
     st.write(pvals_df.to_pandas())
@@ -42,7 +42,7 @@ def plot_cohort_correlation_matrix(df: pl.DataFrame, cohort: pl.String, color_sc
         corr_matrix_masked,
         text_auto=".2f",
         aspect="auto",
-        color_continuous_scale=color_scale,
+        color_continuous_scale=px.colors.diverging.RdBu,
         title=f"{cohort} Cohort Metrics Correlation",
         labels=dict(color="Correlation Coefficient"),
         x=corr_matrix_masked.columns,
