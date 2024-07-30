@@ -27,17 +27,27 @@ def correlation_matrix_with_p_values(df: pl.DataFrame):
     pvals_df = pl.DataFrame(pvals, schema=corr_matrix.schema)
     return corr_matrix, pvals_df
 
-def plot_cohort_correlation_matrix(df: pl.DataFrame, cohort: pl.String, color_scale=px.colors.sequential.RdBu):
+def plot_cohort_correlation_matrix(df: pl.DataFrame, cohort: pl.String, color_scale=px.colors.sequential.RdBu, significance_level=0.05):
     # Filter the DataFrame for the specified cohort and calculate the correlation matrix
     corr_matrix, pvals_df = correlation_matrix_with_p_values(df)
+    st.write("### P-Values")
     st.write(pvals_df.to_pandas())
+    st.write("### Correlation Matrix")
     st.write(corr_matrix.to_pandas())
 
     # Apply a mask to the upper triangle of the correlation matrix
     mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
     corr_matrix_masked = corr_matrix.to_pandas().mask(mask)
-
+    pvals_masked = pvals_df.to_pandas().mask(mask)
     px.colors.diverging.RdBu.reverse()
+
+
+    significances = pvals_df.select([
+        pl.when(cs.numeric().lt(significance_level)).then(pl.lit("*")).otherwise(pl.lit("")).name.prefix("Significance: "),
+        
+    ]).to_pandas()
+
+    masked_significances = significances.mask(mask)
 
     # Create the heatmap
     fig = px.imshow(
@@ -46,11 +56,24 @@ def plot_cohort_correlation_matrix(df: pl.DataFrame, cohort: pl.String, color_sc
         aspect="auto",
         color_continuous_scale=px.colors.diverging.RdBu,
         title=f"{cohort} Cohort Metrics Correlation",
-        labels=dict(color="Correlation Coefficient"),
+        labels=dict(color="Correlation Coefficient", pval="P-Value"),
         x=corr_matrix_masked.columns,
         y=corr_matrix_masked.columns,
         template="plotly_white",
     )
+
+    
+    for i in range(corr_matrix_masked.shape[0]):
+        for j in range(corr_matrix_masked.shape[1]):
+            if not mask[i, j] and masked_significances.iloc[i, j] == "*":
+                fig.add_annotation(
+                    x=corr_matrix_masked.columns[j],
+                    y=corr_matrix_masked.columns[i],
+                    text="*",
+                    xshift=19,
+                    showarrow=False,
+                    font=dict(color="red", size=20),
+                )
 
     # Improve layout and styling
     fig.update_layout(
