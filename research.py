@@ -170,7 +170,7 @@ def rander_histogram(df, value_x, value_y, value_color, graph_type="Histogram"):
 
 def rander_metrics(df: pl.DataFrame, cohors: list):
         for cohort in cohors:
-            plot_cohort_correlation_matrix(df.filter(pl.col(col_all_cohorts) == cohort), cohort, blue_to_green)
+            plot_cohort_correlation_matrix(df.filter(pl.col(col_all_cohorts) == cohort), cohort)
 
 def rander_t_test(df: pl.DataFrame, columns: list):
     col1, col2 = st.columns(2)

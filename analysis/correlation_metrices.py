@@ -27,7 +27,7 @@ def correlation_matrix_with_p_values(df: pl.DataFrame):
     pvals_df = pl.DataFrame(pvals, schema=corr_matrix.schema)
     return corr_matrix, pvals_df
 
-def plot_cohort_correlation_matrix(df: pl.DataFrame, cohort: pl.String, color_scale=px.colors.sequential.RdBu, significance_level=0.05):
+def plot_cohort_correlation_matrix(df: pl.DataFrame, cohort: pl.String, color_scale=px.colors.diverging.RdBu, significance_level=0.05):
     # Filter the DataFrame for the specified cohort and calculate the correlation matrix
     corr_matrix, pvals_df = correlation_matrix_with_p_values(df)
     st.write("### P-Values")
@@ -39,8 +39,6 @@ def plot_cohort_correlation_matrix(df: pl.DataFrame, cohort: pl.String, color_sc
     mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
     corr_matrix_masked = corr_matrix.to_pandas().mask(mask)
     pvals_masked = pvals_df.to_pandas().mask(mask)
-    px.colors.diverging.RdBu.reverse()
-
 
     significances = pvals_df.select([
         pl.when(cs.numeric().lt(significance_level)).then(pl.lit("*")).otherwise(pl.lit("")).name.prefix("Significance: "),
@@ -49,12 +47,23 @@ def plot_cohort_correlation_matrix(df: pl.DataFrame, cohort: pl.String, color_sc
 
     masked_significances = significances.mask(mask)
 
+    # Determine the color scale based on the cohort
+    color_scale = px.colors.diverging.RdBu.copy()
+    if cohort == 'ISR':
+        # Blue at the start, red at the end (original RdBu)
+        pass  # No action needed
+    elif cohort == 'IND':
+        # Red at the start, blue at the end (reverse the color scale)
+        color_scale.reverse()
+
+    
+
     # Create the heatmap
     fig = px.imshow(
         corr_matrix_masked,
         text_auto=".2f",
         aspect="auto",
-        color_continuous_scale=px.colors.diverging.RdBu,
+        color_continuous_scale=color_scale,
         title=f"{cohort} Cohort Metrics Correlation",
         labels=dict(color="Correlation Coefficient", pval="P-Value"),
         x=corr_matrix_masked.columns,
